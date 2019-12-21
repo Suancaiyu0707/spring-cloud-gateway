@@ -30,17 +30,24 @@ import org.springframework.web.reactive.DispatcherHandler;
 
 /**
  * @author Spencer Gibb
+ * 初始化 LoadBalancerClientFilter
  */
 @Configuration
+//如果存在三个类 LoadBalancerClient、RibbonAutoConfiguration、DispatcherHandler 则开始加载GatewayLoadBalancerClientAutoConfiguration
 @ConditionalOnClass({LoadBalancerClient.class, RibbonAutoConfiguration.class, DispatcherHandler.class})
-@AutoConfigureAfter(RibbonAutoConfiguration.class)
+@AutoConfigureAfter(RibbonAutoConfiguration.class)//在RibbonAutoConfiguration之后加载GatewayLoadBalancerClientAutoConfiguration
 public class GatewayLoadBalancerClientAutoConfiguration {
 
 	// GlobalFilter beans
 
+	/***
+	 * 初始化 LoadBalancerClientFilter
+	 * @param client
+	 * @return
+	 */
 	@Bean
-	@ConditionalOnBean(LoadBalancerClient.class)
-	@ConditionalOnMissingBean(LoadBalancerClientFilter.class)
+	@ConditionalOnBean(LoadBalancerClient.class)//LoadBalancerClient已经加载，才能加载LoadBalancerClientFilter
+	@ConditionalOnMissingBean(LoadBalancerClientFilter.class)//如果LoadBalancerClientFilter不存在，则加载LoadBalancerClientFilter
 	public LoadBalancerClientFilter loadBalancerClientFilter(LoadBalancerClient client) {
 		return new LoadBalancerClientFilter(client);
 	}

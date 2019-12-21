@@ -30,25 +30,54 @@ import org.springframework.validation.annotation.Validated;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       - id: cookie-route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Cookie=username, xuzf
+ *         filters:
+ *         - AddRequestHeader=X-Request-Foo, Bar
+ *
  * @author Spencer Gibb
+ * 断言的实体类
  */
 @Validated
 public class PredicateDefinition {
+	/**
+	 * 定义了Predicate类型的名称，必须符合特定的命名规范，为对应的工厂名前缀
+	 * 	CookieRoutePredicateFactory==>Cookie
+	 * 	name：Cookie
+	 */
 	@NotNull
 	private String name;
+	/***
+	 * 一个键值对参数用于构造 Predicate 对象
+	 * eg:
+	 * 	- Cookie=username, xuzf #这里的username, xuzf会被解析到args里
+	 * 	args：{"_genkey_0":"username","_genkey_1":"xuzf"}
+	 */
 	private Map<String, String> args = new LinkedHashMap<>();
 
 	public PredicateDefinition() {
 	}
 
+	/***
+	 *
+	 * @param text eg: - Cookie=username, xuzf
+	 */
 	public PredicateDefinition(String text) {
+		//获得'='位置
 		int eqIdx = text.indexOf('=');
 		if (eqIdx <= 0) {
 			throw new ValidationException("Unable to parse PredicateDefinition text '" + text + "'" +
 					", must be of the form name=value");
 		}
+		//截取'='前的值，设置为name属性，也就是Predicate类型名称，比如：Cookie
 		setName(text.substring(0, eqIdx));
-
+		//处理'='后的参数： username, xuzf。会被转成{"_genkey_0":"username","_genkey_1":"xuzf"}
 		String[] args = tokenizeToStringArray(text.substring(eqIdx+1), ",");
 
 		for (int i=0; i < args.length; i++) {

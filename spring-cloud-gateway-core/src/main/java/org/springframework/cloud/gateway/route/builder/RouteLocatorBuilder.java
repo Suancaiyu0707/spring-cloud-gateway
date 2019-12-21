@@ -29,6 +29,9 @@ import reactor.core.publisher.Flux;
 
 /**
  * Used to build a {@link RouteLocator}
+ * RouteLocatorBuilder bean 在 spring-cloud-starter-gateway 模块自动装配类中已经声明，可直接使用。
+ * RouteLocatorBuilder用于创建RouteLocator，RouteLocator 封装了对 Route 获取的定义，可简单理解成工厂模式。
+ * RouteLocatorBuilder 可以构建多个路由信息
  */
 public class RouteLocatorBuilder {
 

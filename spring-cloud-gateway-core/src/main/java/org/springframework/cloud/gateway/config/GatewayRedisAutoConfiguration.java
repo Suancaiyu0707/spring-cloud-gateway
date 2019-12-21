@@ -25,11 +25,14 @@ import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.DispatcherHandler;
 
+/***
+ * 基于 RedisRateLimiter 实现网关的限流功能
+ */
 @Configuration
-@AutoConfigureAfter(RedisReactiveAutoConfiguration.class)
-@AutoConfigureBefore(GatewayAutoConfiguration.class)
-@ConditionalOnBean(ReactiveRedisTemplate.class)
-@ConditionalOnClass({RedisTemplate.class, DispatcherHandler.class})
+@AutoConfigureAfter(RedisReactiveAutoConfiguration.class) //在 RedisReactiveAutoConfiguration之后加载适配
+@AutoConfigureBefore(GatewayAutoConfiguration.class)//在 GatewayAutoConfiguration之前加载适配
+@ConditionalOnBean(ReactiveRedisTemplate.class) // 如果容器里有ReactiveRedisTemplate实例，则开始加载当前 GatewayRedisAutoConfiguration
+@ConditionalOnClass({RedisTemplate.class, DispatcherHandler.class})//如果容器里有RedisTemplate和DispatcherHandler，则开始加载当前 GatewayRedisAutoConfiguration
 class GatewayRedisAutoConfiguration {
 
 	@Bean

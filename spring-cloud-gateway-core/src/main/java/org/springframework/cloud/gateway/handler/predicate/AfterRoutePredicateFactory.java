@@ -29,7 +29,8 @@ import static org.springframework.cloud.gateway.handler.predicate.BetweenRoutePr
 /**
  * @author Spencer Gibb
  */
-public class AfterRoutePredicateFactory extends AbstractRoutePredicateFactory<AfterRoutePredicateFactory.Config> {
+public class AfterRoutePredicateFactory
+		extends AbstractRoutePredicateFactory<AfterRoutePredicateFactory.Config> {//声明了泛型，即使用到的配置类为 AfterRoutePredicateFactory 中定义的内部类 Config。
 
 	public static final String DATETIME_KEY = "datetime";
 
@@ -42,15 +43,24 @@ public class AfterRoutePredicateFactory extends AbstractRoutePredicateFactory<Af
 		return Collections.singletonList(DATETIME_KEY);
 	}
 
+	/***
+	 * 生产 Predicate 对象，逻辑是判断当前时间（执行时）是否在 Config 中指定的 datetime之后。
+	 * @param config 泛型参数 config
+	 * @return
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		ZonedDateTime datetime = getZonedDateTime(config.getDatetime());
 		return exchange -> {
 			final ZonedDateTime now = ZonedDateTime.now();
+			////比较当前时间和配置的时间，是否大于配置的时间
 			return now.isAfter(datetime);
 		};
 	}
 
+	/***
+	 * 该配置类只包含一个datetime时间字符串属性
+	 */
 	public static class Config {
 		private String datetime;
 

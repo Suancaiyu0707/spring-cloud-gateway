@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * @author Spencer Gibb
+ * 获取外部化配置定义 Route 的信息
  */
 public interface RouteDefinitionLocator {
 

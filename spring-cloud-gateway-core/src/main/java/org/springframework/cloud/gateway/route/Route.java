@@ -38,17 +38,28 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.t
 
 /**
  * @author Spencer Gibb
+ * 路由实体类
  */
 public class Route implements Ordered {
-
+	/***
+	 * route id 唯一id
+	 */
 	private final String id;
-
+	/***
+	 * 路由指向的目的地uri,也就是客户端请求最终被转发的地址
+	 */
 	private final URI uri;
-
+	/***
+	 * 用于多个 Route 之间的排序，数值越小排序越靠前，匹配优先级越高
+	 */
 	private final int order;
-
+	/***
+	 * 断言，也就是匹配该Route的前置条件，只有满足了断言才会被路由到目的对uri
+	 */
 	private final AsyncPredicate<ServerWebExchange> predicate;
-
+	/***
+	 * 网关过滤器，用于处理过滤逻辑等
+	 */
 	private final List<GatewayFilter> gatewayFilters;
 
 	public static Builder builder() {

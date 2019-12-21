@@ -31,6 +31,7 @@ import static org.springframework.util.StringUtils.commaDelimitedListToStringArr
 
 /**
  * @author Spencer Gibb
+ * 这是一个Websocket 路由网关过滤器。其根据 ws:// / wss:// 前缀( Scheme )过滤处理，代理后端 Websocket 服务，提供给客户端连接
  */
 public class WebsocketRoutingFilter implements GlobalFilter, Ordered {
 	private static final Log log = LogFactory.getLog(WebsocketRoutingFilter.class);

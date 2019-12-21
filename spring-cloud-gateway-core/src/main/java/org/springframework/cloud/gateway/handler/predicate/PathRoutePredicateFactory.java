@@ -86,6 +86,7 @@ public class PathRoutePredicateFactory extends AbstractRoutePredicateFactory<Pat
 
 	@Validated
 	public static class Config {
+		//eg: /get
 		private String pattern;
 		private PathPattern pathPattern;
 		private boolean matchOptionalTrailingSeparator = true;

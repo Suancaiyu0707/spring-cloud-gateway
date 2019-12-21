@@ -26,9 +26,14 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author Ben Hale
+ *
  */
 public interface AsyncPredicate<T> extends Function<T, Publisher<Boolean>> {
-
+	/***
+	 * && 操作，表示将两个AsyncPredicate合成一个组合，且需要同时满足
+	 * @param other
+	 * @return
+	 */
 	default AsyncPredicate<T> and(AsyncPredicate<? super T> other) {
 		Objects.requireNonNull(other, "other must not be null");
 
@@ -36,10 +41,19 @@ public interface AsyncPredicate<T> extends Function<T, Publisher<Boolean>> {
 				.map(tuple -> tuple.getT1() && tuple.getT2());
 	}
 
+	/**
+	 * 取反操作，即对 Predicate 匹配结果取反。
+	 * @return
+	 */
 	default AsyncPredicate<T> negate() {
 		return t -> Mono.from(apply(t)).map(b -> !b);
 	}
 
+	/***
+	 * 或操作，表示将两个AsyncPredicate合成一个组合，只需任意一个满足就行
+	 * @param other
+	 * @return
+	 */
 	default AsyncPredicate<T> or(AsyncPredicate<? super T> other) {
 		Objects.requireNonNull(other, "other must not be null");
 

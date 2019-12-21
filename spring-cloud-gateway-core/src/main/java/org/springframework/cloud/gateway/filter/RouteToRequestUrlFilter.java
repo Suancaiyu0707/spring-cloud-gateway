@@ -36,6 +36,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author Spencer Gibb
+ * 对象会根据匹配的Route，计算请求的地址。注意，这里的地址指的是 URL，而不是 URI
  */
 public class RouteToRequestUrlFilter implements GlobalFilter, Ordered {
 

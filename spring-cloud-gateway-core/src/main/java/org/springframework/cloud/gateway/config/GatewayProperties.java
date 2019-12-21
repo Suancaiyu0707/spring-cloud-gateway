@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2013-2018 the original author or authors.
  *
@@ -13,6 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ *
+ *
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: cookie-route
+        uri: http://example.org
+        predicates:
+        - Cookie=username, xuzf #定义了一个 Predicate，当名称为 username 的 Cookie 的值匹配xuzf时 Predicate 才能够匹配，它由 CookieRoutePredicateFactory 来生产
+        filters:
+        - AddRequestHeader=X-Request-Foo, Bar # 定义了一个 Filter，所有的请求转发至下游服务时会添加请求头 X-Request-Foo:Bar ，由AddRequestHeaderGatewayFilterFactory 来生产。
+      - id: default_path_to_httpbin
+        uri: http://example.org
+        order: 10000
+        predicates:
+        - Path=/**
+      default-filters:
+      - PrefixPath=/httpbin
+      - AddResponseHeader=X-Response-Default-Foo, Default-Bar
  */
 
 package org.springframework.cloud.gateway.config;
@@ -34,13 +55,16 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * @author Spencer Gibb
+ * GatewayProperties 是 Spring cloud gateway 模块提供的外部化配置类。
+ *  从appliccation.yml中解析前缀为spring.cloud.gateway的配置
  */
-@ConfigurationProperties("spring.cloud.gateway")
+@ConfigurationProperties("spring.cloud.gateway")//表明以 “spring.cloud.gateway” 前缀的 properties 会绑定 GatewayProperties。
 @Validated
 public class GatewayProperties {
 
 	private final Log logger = LogFactory.getLog(getClass());
 	/**
+	 * 路由定义列表，加载配置key=spring.cloud.gateway.routes 列表
 	 * List of Routes
 	 */
 	@NotNull
@@ -48,10 +72,16 @@ public class GatewayProperties {
 	private List<RouteDefinition> routes = new ArrayList<>();
 
 	/**
+	 * 默认的过滤器定义列表，加载配置 key = spring.cloud.gateway.default-filters 列表
 	 * List of filter definitions that are applied to every route.
+	 *
+	 * 默认的 Filter 会应用到每一个 Route 上，gateway 处理时会将其与 Route 中指定的 Filter 进行合并后并逐个执行。
 	 */
 	private List<FilterDefinition> defaultFilters = new ArrayList<>();
-
+	/**
+	 * 网媒体类型列表，加载配置 key = spring.cloud.gateway.streamingMediaTypes 列表
+	 * 默认包含{text/event-stream,application/stream+json}
+	 */
 	private List<MediaType> streamingMediaTypes = Arrays.asList(MediaType.TEXT_EVENT_STREAM,
 			MediaType.APPLICATION_STREAM_JSON);
 

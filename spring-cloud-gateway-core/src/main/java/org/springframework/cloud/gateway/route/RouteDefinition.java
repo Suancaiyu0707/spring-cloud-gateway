@@ -35,19 +35,29 @@ import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
 /**
  * @author Spencer Gibb
+ * Route定义信息，RouteLocator会将其解析成Route
  */
 @Validated
 public class RouteDefinition {
+	/**
+	 * 定义 Route 的 id，默认使用 UUID
+	 */
 	@NotEmpty
 	private String id = UUID.randomUUID().toString();
-
+	/***
+	 * 为route定义的断言列表
+	 */
 	@NotEmpty
 	@Valid
 	private List<PredicateDefinition> predicates = new ArrayList<>();
-
+	/***
+	 * 为route定义的过滤器列表
+	 */
 	@Valid
 	private List<FilterDefinition> filters = new ArrayList<>();
-
+	/***
+	 * route转发的uri
+	 */
 	@NotNull
 	private URI uri;
 

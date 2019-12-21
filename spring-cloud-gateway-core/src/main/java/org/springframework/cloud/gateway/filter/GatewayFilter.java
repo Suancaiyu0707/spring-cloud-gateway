@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * 这个接口是一个过滤器 会绑定到过滤链GatewayFilterChain上，所以这里filter方法会持有GatewayFilterChain参数
  */
 public interface GatewayFilter extends ShortcutConfigurable {
 

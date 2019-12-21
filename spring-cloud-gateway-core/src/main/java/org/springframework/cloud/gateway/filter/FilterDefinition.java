@@ -29,25 +29,55 @@ import org.springframework.validation.annotation.Validated;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       - id: cookie-route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Cookie=username, xuzf
+ *         filters:
+ *         - AddRequestHeader=X-Request-Foo, Bar
+ *
  * @author Spencer Gibb
+ * 用于定义Filter
  */
 @Validated
 public class FilterDefinition {
+	/**
+	 * 定义了Filter类型的名称，必须符合特定的命名规范，为对应的工厂名前缀
+	 * eg：
+	 * 		AddRequestHeaderGatewayFilterFactory==>AddRequestHeader
+	 * 	name: AddRequestHeader
+	 */
 	@NotNull
 	private String name;
+	/***
+	 * 一个键值对参数用于构造 Filter 对象
+	 * eg:
+	 * 	- AddRequestHeader=X-Request-Foo, Bar #这里的X-Request-Foo, Bar会被解析成到args里
+	 * 	args：{"_genkey_0":"X-Request-Foo","_genkey_1":"Bar"}
+	 */
 	private Map<String, String> args = new LinkedHashMap<>();
 
 	public FilterDefinition() {
 	}
 
+	/***
+	 *
+	 * @param text eg：AddRequestHeader=X-Request-Foo, Bar
+	 */
 	public FilterDefinition(String text) {
+		//获得'='位置
 		int eqIdx = text.indexOf('=');
-		if (eqIdx <= 0) {
+		if (eqIdx <= 0) {//如果不存在'='
 			setName(text);
 			return;
 		}
+		//如果存在'='号，则截取'='前的值，设置为name属性，也就是Filter类型名称，比如：AddRequestHeader
 		setName(text.substring(0, eqIdx));
-
+		//处理'='后的参数： X-Request-Foo, Bar。会被转成{"_genkey_0":"X-Request-Foo","_genkey_1":"Bar"}
 		String[] args = tokenizeToStringArray(text.substring(eqIdx+1), ",");
 
 		for (int i=0; i < args.length; i++) {
