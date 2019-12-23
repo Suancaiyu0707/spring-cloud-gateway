@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 /**
  * @author Spencer Gibb
  * 用于获取Route
+ * 通过实现RouteLocator,自定义获得Route的方法
  */
 //TODO: rename to Routes?
 public interface RouteLocator {

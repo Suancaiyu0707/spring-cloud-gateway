@@ -29,11 +29,14 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author Spencer Gibb
+ * 基于内存为存储器的 RouteDefinitionLocator
  */
 public class InMemoryRouteDefinitionRepository implements RouteDefinitionRepository {
-
+	/**
+	 * 路由配置映射
+	 * key ：路由编号 {@link RouteDefinition#id}
+	 */
 	private final Map<String, RouteDefinition> routes = synchronizedMap(new LinkedHashMap<String, RouteDefinition>());
-
 	@Override
 	public Mono<Void> save(Mono<RouteDefinition> route) {
 		return route.flatMap( r -> {

@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * @author Spencer Gibb
+ * 从配置文件(yml/properties) 读取路由配置
  */
 public class PropertiesRouteDefinitionLocator implements RouteDefinitionLocator {
 
@@ -33,6 +34,10 @@ public class PropertiesRouteDefinitionLocator implements RouteDefinitionLocator 
 		this.properties = properties;
 	}
 
+	/***
+	 * 从 GatewayProperties 获取路由配置数组
+	 * @return
+	 */
 	@Override
 	public Flux<RouteDefinition> getRouteDefinitions() {
 		return Flux.fromIterable(this.properties.getRoutes());

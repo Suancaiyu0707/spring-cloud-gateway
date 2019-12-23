@@ -157,7 +157,7 @@ import static org.springframework.cloud.gateway.config.HttpClientProperties.Pool
  * 8、初始化 所有的RouteDefinitionLocator。
  * 9、初始化 RouteLocator
  * 10、初始化 RoutePredicateHandlerMapping，用于查找匹配到Route，并进行处理
- * 11、初始化 GatewayWebfluxEndpoint，提供管理网关的 HTTP API
+ * 11、初始化 GatewayControllerEndpoint，提供管理网关的 HTTP API
  */
 @Configuration
 //只有开启了 spring.cloud.gateway.enabled= true，才会加载该GatewayAutoConfiguration，默认是开启
@@ -756,7 +756,7 @@ public class GatewayAutoConfiguration {
 	}
 
 	/**
-	 * 创建一个类型为 org.springframework.cloud.gateway.actuate.GatewayWebfluxEndpoint 的 Bean 对象，提供管理网关的 HTTP API
+	 * 创建一个类型为 GatewayControllerEndpoint 的 Bean 对象，提供管理网关的 HTTP API
 	 */
 	@Configuration
 	@ConditionalOnClass(Health.class)

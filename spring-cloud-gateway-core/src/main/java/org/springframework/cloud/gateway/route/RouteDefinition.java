@@ -36,6 +36,7 @@ import static org.springframework.util.StringUtils.tokenizeToStringArray;
 /**
  * @author Spencer Gibb
  * Route定义信息，RouteLocator会将其解析成Route
+ *
  */
 @Validated
 public class RouteDefinition {
@@ -65,20 +66,26 @@ public class RouteDefinition {
 
 	public RouteDefinition() {}
 
+	/***
+	 * text: ${id}=${uri},${predicates[0]},${predicates[1]}...${predicates[n]}
+	 * 		eg：route001=http://127.0.0.1,Host=**.addrequestparameter.org,Path=/get
+	 * @param text
+	 */
 	public RouteDefinition(String text) {
 		int eqIdx = text.indexOf('=');
 		if (eqIdx <= 0) {
 			throw new ValidationException("Unable to parse RouteDefinition text '" + text + "'" +
 					", must be of the form name=value");
 		}
-
+		// id：route001
 		setId(text.substring(0, eqIdx));
-
+		//
 		String[] args = tokenizeToStringArray(text.substring(eqIdx+1), ",");
-
+		//http://127.0.0.1
 		setUri(URI.create(args[0]));
-
+		//开始处理 ：Host=**.addrequestparameter.org,Path=/get
 		for (int i=1; i < args.length; i++) {
+			//可以看到 会交给 PredicateDefinition 处理断言
 			this.predicates.add(new PredicateDefinition(args[i]));
 		}
 	}

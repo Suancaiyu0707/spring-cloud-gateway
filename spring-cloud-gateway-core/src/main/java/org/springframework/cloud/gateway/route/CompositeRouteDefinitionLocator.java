@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * @author Spencer Gibb
+ * 组合多种 RouteDefinitionLocator 的实现
  */
 public class CompositeRouteDefinitionLocator implements RouteDefinitionLocator {
 
