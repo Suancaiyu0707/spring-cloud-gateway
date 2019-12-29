@@ -30,11 +30,15 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * @author Spencer Gibb
+ * 提供了缓存路由的功能
  */
 public class CachingRouteLocator implements RouteLocator {
 
 	private final RouteLocator delegate;
 	private final Flux<Route> routes;
+	/**
+	 * 根据key/value 缓存路由映射关系
+	 */
 	private final Map<String, List> cache = new HashMap<>();
 
 	public CachingRouteLocator(RouteLocator delegate) {
@@ -43,13 +47,17 @@ public class CachingRouteLocator implements RouteLocator {
 				.onCacheMissResume(() -> this.delegate.getRoutes().sort(AnnotationAwareOrderComparator.INSTANCE));
 	}
 
+	/***
+	 * 返回内部缓存的路由列表
+	 * @return
+	 */
 	@Override
 	public Flux<Route> getRoutes() {
 		return this.routes;
 	}
 
 	/**
-	 * Clears the routes cache
+	 * 刷新清空缓存内部的路由洗信息
 	 * @return routes flux
 	 */
 	public Flux<Route> refresh() {

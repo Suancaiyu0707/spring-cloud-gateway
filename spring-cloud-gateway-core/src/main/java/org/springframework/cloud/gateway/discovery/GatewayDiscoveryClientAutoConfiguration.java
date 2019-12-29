@@ -44,6 +44,7 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
 
 /**
  * @author Spencer Gibb
+ * 网关在启动时候自动初始化GatewayDiscoveryClientAutoConfiguration用于从eureka上获取服务列表
  */
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.gateway.enabled", matchIfMissing = true)

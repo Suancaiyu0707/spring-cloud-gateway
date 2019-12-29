@@ -21,15 +21,22 @@ import reactor.core.publisher.Flux;
 
 /**
  * @author Spencer Gibb
+ * 主要用于组合多种的RouteLocator实现类，为映射处理类RoutePredicateHandlerMapping提供统一的处理入口
  */
 public class CompositeRouteLocator implements RouteLocator {
-
+	/**
+	 * 将组合的 delegates(内部组合了多种RouteLocator实现)
+	 */
 	private final Flux<RouteLocator> delegates;
 
 	public CompositeRouteLocator(Flux<RouteLocator> delegates) {
 		this.delegates = delegates;
 	}
 
+	/**
+	 * 将组合的 delegates 的路由全部返回
+	 * @return
+	 */
 	@Override
 	public Flux<Route> getRoutes() {
 		return this.delegates.flatMap(RouteLocator::getRoutes);

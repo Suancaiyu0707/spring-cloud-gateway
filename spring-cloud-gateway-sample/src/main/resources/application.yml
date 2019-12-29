@@ -31,7 +31,13 @@ spring:
         order: 10000
         predicates:
         - Path=/**
-
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 30
+  client:
+    serviceUrl:
+      defaultZone: http://eureka.didispace.com/eureka/
 logging:
   level:
     org.springframework.cloud.gateway: TRACE
