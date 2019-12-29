@@ -36,7 +36,16 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.p
 import static org.springframework.http.server.PathContainer.parsePath;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       - id: host_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Path=/test/{segment}
  * @author Spencer Gibb
+ * 请求 Path 匹配指定值。
  */
 public class PathRoutePredicateFactory extends AbstractRoutePredicateFactory<PathRoutePredicateFactory.Config> {
 	private static final Log log = LogFactory.getLog(RoutePredicateFactory.class);
@@ -57,6 +66,14 @@ public class PathRoutePredicateFactory extends AbstractRoutePredicateFactory<Pat
 		return Arrays.asList(PATTERN_KEY, MATCH_OPTIONAL_TRAILING_SEPARATOR_KEY);
 	}
 
+	/***
+	 *
+	 * @param config 泛型参数 config
+	 * @return
+	 * 1、初始化路径模型转换器
+	 * 2、使用pathPatternParser将配置的path转成对应的模式
+	 * 3、检查请求的path是否和配置匹配，再决定是否要走该断言
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		synchronized (this.pathPatternParser) {

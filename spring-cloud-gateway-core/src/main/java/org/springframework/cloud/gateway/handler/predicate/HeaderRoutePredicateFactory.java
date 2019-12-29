@@ -29,7 +29,17 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: header_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Header=X-Request-Id, \d+
  * @author Spencer Gibb
+ * 匹配请求中的request header信息
  */
 public class HeaderRoutePredicateFactory extends AbstractRoutePredicateFactory<HeaderRoutePredicateFactory.Config> {
 
@@ -45,6 +55,14 @@ public class HeaderRoutePredicateFactory extends AbstractRoutePredicateFactory<H
 		return Arrays.asList(HEADER_KEY, REGEXP_KEY);
 	}
 
+	/***
+	 *
+	 * @param config 泛型参数 config
+	 * @return
+	 * 1、从request,header中获得指定的header名称对应的值
+	 * 2、如果对应的值为空，则不走该断言
+	 * 3、如果对应的值不为空，且满足当前匹配的正则，则走该断言
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		boolean hasRegex = !StringUtils.isEmpty(config.regexp);

@@ -28,6 +28,17 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: query_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Query=name  #表示param是name即可
+ *         - Query=name, xuzf # 表示param是name，regexp是xuzf
+ * 根据request中的QueryParam请求参数匹配
  * @author Spencer Gibb
  */
 public class QueryRoutePredicateFactory extends AbstractRoutePredicateFactory<QueryRoutePredicateFactory.Config> {
@@ -44,19 +55,29 @@ public class QueryRoutePredicateFactory extends AbstractRoutePredicateFactory<Qu
 		return Arrays.asList(PARAM_KEY, REGEXP_KEY);
 	}
 
+	/**
+	 *
+	 * @param config 泛型参数 config
+	 * @return
+	 * 1、如果regexp为空，也就是不是按照正则来匹配的话。则直接判断请求参数里是否包含指定的参数param
+	 * 2、如果regexp不为空，也就是根据正则来匹配参数的值
+	 * 		a、如果请求中没有传递参数，则不走该断言
+	 * 		b、如果传递参数中，包含指定的参数，则可能传递多个值，则只要有一个值匹配正则，则走该断言
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		return exchange -> {
+			//
 			if (!StringUtils.hasText(config.regexp)) {
 				// check existence of header
 				return exchange.getRequest().getQueryParams().containsKey(config.param);
 			}
-
-
+			//如果regexp不为空，也就是根据正则来匹配参数的值
 			List<String> values = exchange.getRequest().getQueryParams().get(config.param);
-			if (values == null) {
+			if (values == null) {//如果请求中没有传递参数，则不走该断言
 				return false;
 			}
+			//如果传递参数中，包含指定的参数，则可能传递多个值，则只要有一个值匹配正则，则走该断言
 			for (String value : values) {
 				if (value != null && value.matches(config.regexp)) {
 					return true;
@@ -70,7 +91,9 @@ public class QueryRoutePredicateFactory extends AbstractRoutePredicateFactory<Qu
 	public static class Config {
 		@NotEmpty
 		private String param;
-
+		/**
+		 * 如果是按照正则匹配的话
+		 */
 		private String regexp;
 
 		public String getParam() {

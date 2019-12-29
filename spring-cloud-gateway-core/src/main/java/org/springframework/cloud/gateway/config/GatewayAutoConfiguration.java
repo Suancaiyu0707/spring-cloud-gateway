@@ -340,6 +340,7 @@ public class GatewayAutoConfiguration {
 	@Bean
 	@Primary // 优先被注入
 	public RouteDefinitionLocator routeDefinitionLocator(List<RouteDefinitionLocator> routeDefinitionLocators) {
+		//会根据routeDefinitionLocators组合后封装到CompositeRouteDefinitionLocator
 		return new CompositeRouteDefinitionLocator(Flux.fromIterable(routeDefinitionLocators));
 	}
 
@@ -352,10 +353,11 @@ public class GatewayAutoConfiguration {
 	 * @return
 	 */
 	@Bean
-	public RouteLocator routeDefinitionRouteLocator(GatewayProperties properties,
-												   List<GatewayFilterFactory> GatewayFilters,
-												   List<RoutePredicateFactory> predicates,
-												   RouteDefinitionLocator routeDefinitionLocator) {
+	public RouteLocator routeDefinitionRouteLocator(GatewayProperties properties, //网关配置信息
+												   List<GatewayFilterFactory> GatewayFilters,//网关配置的过滤器
+												   List<RoutePredicateFactory> predicates,//网关上配置的断言
+												   RouteDefinitionLocator routeDefinitionLocator) //路由定义
+	{
 		return new RouteDefinitionRouteLocator(routeDefinitionLocator, predicates, GatewayFilters, properties);
 	}
 

@@ -45,10 +45,20 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @author Rossen Stoyanchev
  * @author Spencer Gibb
  * @since 0.1
+ *
+ *	FilteringWebHandler 通过创建请求对应的 Route 对应的 GatewayFilterChain 进行处理
  */
 public class FilteringWebHandler implements WebHandler {
 	protected static final Log logger = LogFactory.getLog(FilteringWebHandler.class);
-
+	/**
+	 * 0 = {AdaptCachedBodyGlobalFilter@6128}
+	 * 1 = {NettyWriteResponseFilter@6188}
+	 * 2 = {ForwardPathFilter@6195}
+	 * 3 = {RouteToRequestUrlFilter@6200}
+	 * 4 = {WebsocketRoutingFilter@6204}
+	 * 5 = {NettyRoutingFilter@6208}
+	 * 6 = {ForwardRoutingFilter@6212}
+	 */
 	private final List<GatewayFilter> globalFilters;
 
 	public FilteringWebHandler(List<GlobalFilter> globalFilters) {
@@ -72,6 +82,11 @@ public class FilteringWebHandler implements WebHandler {
         this.combinedFiltersForRoute.clear();
     }*/
 
+	/***
+	 * 执行当前路由的过滤器和全局过滤器
+	 * @param exchange
+	 * @return
+	 */
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
 		Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);

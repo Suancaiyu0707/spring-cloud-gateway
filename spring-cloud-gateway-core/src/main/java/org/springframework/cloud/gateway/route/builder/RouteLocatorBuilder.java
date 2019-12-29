@@ -53,7 +53,9 @@ public class RouteLocatorBuilder {
 	 * A class that can be used to construct routes and return a {@link RouteLocator}
 	 */
 	public static class Builder {
-
+		/***
+		 * LocatorBuilder 已创建好的 Route 数组
+		 */
 		private List<Route.AsyncBuilder> routes = new ArrayList<>();
 		private ConfigurableApplicationContext context;
 
@@ -66,9 +68,14 @@ public class RouteLocatorBuilder {
 		 * @param id the unique id for the route
 		 * @param fn a function which takes in a {@link PredicateSpec} and returns a {@link Route.AsyncBuilder}
 		 * @return a {@link Builder}
+		 * 1、创建RouteSpec对象
+		 * 2、调用 RouteSpec#id(...) 方法，创建 PredicateSpec 对象
 		 */
 		public Builder route(String id, Function<PredicateSpec, Route.AsyncBuilder> fn) {
-			Route.AsyncBuilder routeBuilder = fn.apply(new RouteSpec(this).id(id));
+			Route.AsyncBuilder routeBuilder = fn.apply(
+					new RouteSpec(this)//创建RouteSpec对象
+					.id(id)//调用 RouteSpec#id(...) 方法，创建 PredicateSpec 对象
+			);
 			add(routeBuilder);
 			return this;
 		}
@@ -77,6 +84,7 @@ public class RouteLocatorBuilder {
 		 * Creates a new {@link Route}
 		 * @param fn a function which takes in a {@link PredicateSpec} and returns a {@link Route.AsyncBuilder}
 		 * @return a {@link Builder}
+
 		 */
 		public Builder route(Function<PredicateSpec, Route.AsyncBuilder> fn) {
 			Route.AsyncBuilder routeBuilder = fn.apply(new RouteSpec(this).randomId());
@@ -96,6 +104,10 @@ public class RouteLocatorBuilder {
 			return context;
 		}
 
+		/***
+		 * routes添加一个路由route
+		 * @param route
+		 */
 		void add(Route.AsyncBuilder route) {
 			routes.add(route);
 		}
@@ -110,6 +122,11 @@ public class RouteLocatorBuilder {
 			this.builder = builder;
 		}
 
+		/***
+		 * 创建PredicateSpec对象
+		 * @param id
+		 * @return
+		 */
 		public PredicateSpec id(String id) {
 			this.routeBuilder.id(id);
 			return predicateBuilder();

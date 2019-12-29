@@ -31,7 +31,16 @@ import org.springframework.web.server.ServerWebExchange;
 import javax.validation.constraints.NotEmpty;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       - id: after_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Betweeen=2019-12-28T17:42:47.789-07:00[America/Denver],2019-12-29T17:42:47.789-07:00[America/Denver],
  * @author Spencer Gibb
+ * 当请求的时间在配置的两个时间之间，则会走这个断言
  */
 public class BetweenRoutePredicateFactory extends AbstractRoutePredicateFactory<BetweenRoutePredicateFactory.Config> {
 
@@ -47,6 +56,11 @@ public class BetweenRoutePredicateFactory extends AbstractRoutePredicateFactory<
 		return Arrays.asList(DATETIME1_KEY, DATETIME2_KEY);
 	}
 
+	/**
+	 *  根据配置信息校验时间
+	 * @param config 泛型参数 config
+	 * @return
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		//TODO: figure out boot conversion

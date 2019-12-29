@@ -25,7 +25,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: method_route
+ *         uri: http://localhost/
+ *         predicates:
+ *         - Method=GET
  * @author Spencer Gibb
+ * 检查这个请求的方式是否符合
  */
 public class MethodRoutePredicateFactory extends AbstractRoutePredicateFactory<MethodRoutePredicateFactory.Config> {
 
@@ -40,6 +50,13 @@ public class MethodRoutePredicateFactory extends AbstractRoutePredicateFactory<M
 		return Arrays.asList(METHOD_KEY);
 	}
 
+	/***
+	 *
+	 * @param config 泛型参数 config
+	 * @return
+	 * 1、获取请求方式 GET/PUT/DELETE等
+	 * 2、检查请求方式是否满足配置，是的话走该断言
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		return exchange -> {
@@ -49,6 +66,7 @@ public class MethodRoutePredicateFactory extends AbstractRoutePredicateFactory<M
 	}
 
 	public static class Config {
+		//请求方式 GET/PUT/DELETE等
 		private HttpMethod method;
 
 		public HttpMethod getMethod() {

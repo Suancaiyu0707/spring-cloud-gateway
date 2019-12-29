@@ -39,6 +39,16 @@ import io.netty.handler.ipfilter.IpFilterRuleType;
 import io.netty.handler.ipfilter.IpSubnetFilterRule;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: remoteaddr_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - RemoteAddr=192.168.1.1/24
+ * 请求来源 IP 在指定范围内。
  * @author Spencer Gibb
  */
 public class RemoteAddrRoutePredicateFactory extends AbstractRoutePredicateFactory<RemoteAddrRoutePredicateFactory.Config> {
@@ -68,6 +78,13 @@ public class RemoteAddrRoutePredicateFactory extends AbstractRoutePredicateFacto
 		return sources;
 	}
 
+	/**
+	 *
+	 * @param config 泛型参数 config
+	 * @return
+	 * 1、获取请求来源的ip地址和host
+	 * 2、判断ip在指定的ip范围内，则走该断言
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
         List<IpSubnetFilterRule> sources = convert(config.sources);
@@ -75,13 +92,18 @@ public class RemoteAddrRoutePredicateFactory extends AbstractRoutePredicateFacto
 		return exchange -> {
 			InetSocketAddress remoteAddress = config.remoteAddressResolver.resolve(exchange);
 			if (remoteAddress != null) {
+				/***
+				 * 获取请求来源的ip地址和host
+				 */
 				String hostAddress = remoteAddress.getAddress().getHostAddress();
 				String host = exchange.getRequest().getURI().getHost();
 
 				if (log.isDebugEnabled() && !hostAddress.equals(host)) {
 					log.debug("Remote addresses didn't match " + hostAddress + " != " + host);
 				}
-
+				/***
+				 * ip在指定的ip范围内，则走该断言
+				 */
 				for (IpSubnetFilterRule source : sources) {
 					if (source.matches(remoteAddress)) {
 						return true;

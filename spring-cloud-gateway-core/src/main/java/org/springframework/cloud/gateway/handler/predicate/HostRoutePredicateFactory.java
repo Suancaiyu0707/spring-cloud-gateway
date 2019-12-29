@@ -30,10 +30,22 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: host_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Host=**.somehost.org
  * @author Spencer Gibb
+ * 匹配请求中的request header中的Host的值
  */
 public class HostRoutePredicateFactory extends AbstractRoutePredicateFactory<HostRoutePredicateFactory.Config> {
-
+	/***
+	 * 路径匹配器
+	 */
 	private PathMatcher pathMatcher = new AntPathMatcher(".");
 
 	public HostRoutePredicateFactory() {
@@ -49,6 +61,13 @@ public class HostRoutePredicateFactory extends AbstractRoutePredicateFactory<Hos
 		return Collections.singletonList(PATTERN_KEY);
 	}
 
+	/**
+	 *
+	 * @param config 泛型参数 config
+	 * @return
+	 * 1、获得请求中的request header中的Host的值，如果有多个的话，获取第一个即可
+	 * 2、检查Host的值是否满足正则，是的话，走该断言
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		return exchange -> {
@@ -64,6 +83,9 @@ public class HostRoutePredicateFactory extends AbstractRoutePredicateFactory<Hos
 
 	@Validated
 	public static class Config {
+		/**
+		 * Host的匹配模式
+		 */
 		private String pattern;
 
 		public String getPattern() {

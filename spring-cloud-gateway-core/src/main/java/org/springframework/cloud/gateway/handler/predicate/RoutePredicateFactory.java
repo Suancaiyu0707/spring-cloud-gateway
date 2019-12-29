@@ -96,7 +96,7 @@ public interface RoutePredicateFactory<C> extends ShortcutConfigurable, Configur
 	}
 
 	/***
-	 * 获得断言名称
+	 * 获得断言名称,该方法截取类名前半段,例如：BeforeRoutePredicateFactory->Bufore
 	 * @return
 	 */
 	default String name() {

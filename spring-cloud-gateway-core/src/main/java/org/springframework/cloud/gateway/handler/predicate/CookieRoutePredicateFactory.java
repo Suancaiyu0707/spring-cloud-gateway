@@ -28,7 +28,16 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       - id: cookie_route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Cookie=name, xuzf
  * @author Spencer Gibb
+ * 如果请求中有指定cookie，且值和指定的值一样,走该断言
  */
 public class CookieRoutePredicateFactory extends AbstractRoutePredicateFactory<CookieRoutePredicateFactory.Config> {
 
@@ -44,6 +53,11 @@ public class CookieRoutePredicateFactory extends AbstractRoutePredicateFactory<C
 		return Arrays.asList(NAME_KEY, REGEXP_KEY);
 	}
 
+	/***
+	 * 从请求中获得指定cookie名，并比较cookie的值，只要名称和值都匹配了，才会走这个断言
+	 * @param config 泛型参数 config
+	 * @return
+	 */
 	@Override
 	public Predicate<ServerWebExchange> apply(Config config) {
 		return exchange -> {
@@ -60,11 +74,19 @@ public class CookieRoutePredicateFactory extends AbstractRoutePredicateFactory<C
 		};
 	}
 
+
 	@Validated
 	public static class Config {
-
+		/**
+		 * cookie的名称
+		 *
+		 */
 		@NotEmpty
 		private String name;
+		/**
+		 * cookie值的表达式
+		 *
+		 */
 		@NotEmpty
 		private String regexp;
 
