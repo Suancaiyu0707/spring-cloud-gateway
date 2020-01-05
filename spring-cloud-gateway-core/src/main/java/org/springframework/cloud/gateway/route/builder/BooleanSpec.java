@@ -73,6 +73,11 @@ public class BooleanSpec extends UriSpec {
 	 * @param fn A {@link Function} that takes in a {@link GatewayFilterSpec} and returns a {@link UriSpec}
 	 * @return a {@link UriSpec}
 	 */
+	/***
+	 * 向路由定义中添加过滤器，并返回一个UriSpec
+	 * @param fn 用于返回购率器
+	 * @return
+	 */
 	public UriSpec filters(Function<GatewayFilterSpec, UriSpec> fn) {
 		return fn.apply(new GatewayFilterSpec(routeBuilder, builder));
 	}

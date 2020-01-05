@@ -115,6 +115,11 @@ public class ServerWebExchangeUtils {
 		return httpStatus;
 	}
 
+	/**
+	 * 添加 原始请求URI 到 GATEWAY_ORIGINAL_REQUEST_URL_ATTR
+	 * @param exchange
+	 * @param url
+	 */
 	public static void addOriginalRequestUrl(ServerWebExchange exchange, URI url) {
 		exchange.getAttributes().computeIfAbsent(GATEWAY_ORIGINAL_REQUEST_URL_ATTR, s -> new LinkedHashSet<>());
 		LinkedHashSet<URI> uris = exchange.getRequiredAttribute(GATEWAY_ORIGINAL_REQUEST_URL_ATTR);

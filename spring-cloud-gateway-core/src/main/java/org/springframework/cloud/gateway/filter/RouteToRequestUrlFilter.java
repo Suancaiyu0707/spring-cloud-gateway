@@ -51,17 +51,29 @@ public class RouteToRequestUrlFilter implements GlobalFilter, Ordered {
 		return ROUTE_TO_URL_FILTER_ORDER;
 	}
 
+	/***
+	 *
+	 * @param exchange the current server exchange
+	 * @param chain provides a way to delegate to the next filter
+	 * @return
+	 * 1、根据gatewayRoute获取Route
+	 * 2、获取requets的uri
+	 * 3、获取路由指向的目的地uri,也就是客户端请求最终被转发的地址
+	 */
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		//根据gatewayRoute获取Route
 		Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
 		if (route == null) {
 			return chain.filter(exchange);
 		}
 		log.trace("RouteToRequestUrlFilter start");
+		//获取requets的uri
 		URI uri = exchange.getRequest().getURI();
 		boolean encoded = containsEncodedParts(uri);
+		//获取路由指向的目的地uri,也就是客户端请求最终被转发的地址
 		URI routeUri = route.getUri();
-
+		//检查routeUri的合法性
 		if (hasAnotherScheme(routeUri)) {
 			// this is a special url, save scheme to special attribute
 			// replace routeUri with schemeSpecificPart
@@ -74,20 +86,23 @@ public class RouteToRequestUrlFilter implements GlobalFilter, Ordered {
 			//likely because the host name was invalid (for example included an underscore)
 			throw new IllegalStateException("Invalid host: " + routeUri.toString());
 		}
-
+		// 拼接 requestUrl
 		URI mergedUrl = UriComponentsBuilder.fromUri(uri)
 				// .uri(routeUri)
-				.scheme(routeUri.getScheme())
-				.host(routeUri.getHost())
-				.port(routeUri.getPort())
+				.scheme(routeUri.getScheme()) // schema
+				.host(routeUri.getHost()) //host
+				.port(routeUri.getPort())//port
 				.build(encoded)
 				.toUri();
+		// 设置 requestUrl 到 GATEWAY_REQUEST_URL_ATTR {@link RewritePathGatewayFilterFactory}
 		exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, mergedUrl);
+		// 提交过滤器链继续过滤
 		return chain.filter(exchange);
 	}
 
 	/* for testing */ static boolean hasAnotherScheme(URI uri) {
-		return schemePattern.matcher(uri.getSchemeSpecificPart()).matches() && uri.getHost() == null
+		return schemePattern.matcher(uri.getSchemeSpecificPart()).matches()
+				&& uri.getHost() == null
 				&& uri.getRawPath() == null;
 	}
 }

@@ -22,16 +22,17 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
  * @author Spencer Gibb
+ * 创建一个用于添加requetHeader的过滤器
  */
 public class AddRequestHeaderGatewayFilterFactory extends AbstractNameValueGatewayFilterFactory {
 
 	@Override
 	public GatewayFilter apply(NameValueConfig config) {
 		return (exchange, chain) -> {
-			ServerHttpRequest request = exchange.getRequest().mutate()
-					.header(config.getName(), config.getValue())
+			ServerHttpRequest request = exchange.getRequest().mutate()//获得requestHeader
+					.header(config.getName(), config.getValue()) //为requestHeader添加key-value
 					.build();
-
+			// 创建新的 ServerWebExchange ，提交过滤器链继续过滤
 			return chain.filter(exchange.mutate().request(request).build());
 		};
     }

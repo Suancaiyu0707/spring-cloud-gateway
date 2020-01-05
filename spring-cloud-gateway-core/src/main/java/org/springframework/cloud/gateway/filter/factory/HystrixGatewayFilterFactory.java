@@ -50,6 +50,19 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.containsEncodedParts;
 
 /**
+ * spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: default_path_to_httpbin
+ *         uri: http://127.0.0.1:8081
+ *         order: 10000
+ *         predicates:
+ *         - Path=/**
+ *         filters:
+ *         - Hystrix=myCommandName
+ *
  * Depends on `spring-cloud-starter-netflix-hystrix`,
  * {@see https://cloud.spring.io/spring-cloud-netflix/}.
  *

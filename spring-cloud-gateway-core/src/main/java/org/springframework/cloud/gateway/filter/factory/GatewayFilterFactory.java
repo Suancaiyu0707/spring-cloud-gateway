@@ -27,8 +27,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
  * @author Spencer Gibb
- * 用于生成GatewayFilter的接口
- *
+ * 用于生成GatewayFilter的接口实现类
  * 同样继承了 ShortcutConfigurable 和 Configurable 接口，支持配置
  */
 @FunctionalInterface
@@ -57,6 +56,7 @@ public interface GatewayFilterFactory<C> extends ShortcutConfigurable, Configura
 	 * 接收Config配置，生产 GatewayFilter，
 	 * @param config
 	 * @return
+	 * 每一个 GatewayFilterFactory实现类内部都有一个apply方法，用于生产实现GatewayFilter接口的实现类实例
 	 */
 	GatewayFilter apply(C config);
 

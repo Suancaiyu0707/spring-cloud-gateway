@@ -123,6 +123,11 @@ public class Route implements Ordered {
 			return uri(URI.create(uri));
 		}
 
+		/***
+		 * 根据uri返回一个构建器
+		 * @param uri
+		 * @return
+		 */
 		public B uri(URI uri) {
 			this.uri = uri;
 			String scheme = this.uri.getScheme();

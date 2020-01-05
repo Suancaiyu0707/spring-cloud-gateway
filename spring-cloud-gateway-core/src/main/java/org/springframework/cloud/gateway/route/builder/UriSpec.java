@@ -22,6 +22,7 @@ import java.net.URI;
 
 /**
  * A specification to add a URI to a route.
+ * 用于向route中添加uri的规格定义
  */
 public class UriSpec {
 	final Route.AsyncBuilder routeBuilder;

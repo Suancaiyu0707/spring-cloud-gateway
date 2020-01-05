@@ -37,6 +37,7 @@ import reactor.core.publisher.Mono;
 /**
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * 根据 lb:// 前缀过滤处理，使用 serviceId 选择一个服务实例，从而实现负载均衡。
  */
 public class LoadBalancerClientFilter implements GlobalFilter, Ordered {
 
@@ -54,19 +55,28 @@ public class LoadBalancerClientFilter implements GlobalFilter, Ordered {
 		return LOAD_BALANCER_CLIENT_FILTER_ORDER;
 	}
 
+	/***
+	 *
+	 * @param exchange the current server exchange
+	 * @param chain provides a way to delegate to the next filter
+	 * @return
+	 */
 	@Override
-	@SuppressWarnings("Duplicates")
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		//从reqeust中获得请求的url
 		URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
 		String schemePrefix = exchange.getAttribute(GATEWAY_SCHEME_PREFIX_ATTR);
+		//如果不是lb，则跳过，交给下一个过滤器处理
 		if (url == null || (!"lb".equals(url.getScheme()) && !"lb".equals(schemePrefix))) {
 			return chain.filter(exchange);
 		}
-		//preserve the original url
+		//添加 原始请求URI 到 GATEWAY_ORIGINAL_REQUEST_URL_ATTR
 		addOriginalRequestUrl(exchange, url);
 
 		log.trace("LoadBalancerClientFilter url before: " + url);
-
+		/**
+		 *根据负载均衡选中一个实例
+		 */
 		final ServiceInstance instance = choose(exchange);
 
 		if (instance == null) {
@@ -81,7 +91,7 @@ public class LoadBalancerClientFilter implements GlobalFilter, Ordered {
 		if (schemePrefix != null) {
 			overrideScheme = url.getScheme();
 		}
-
+		//根据选中的实例重新构建一个requestUrl
 		URI requestUrl = loadBalancer.reconstructURI(new DelegatingServiceInstance(instance, overrideScheme), uri);
 
 		log.trace("LoadBalancerClientFilter url chosen: " + requestUrl);
@@ -89,6 +99,11 @@ public class LoadBalancerClientFilter implements GlobalFilter, Ordered {
 		return chain.filter(exchange);
 	}
 
+	/***
+	 * 根据负载均衡选中一个服务实例
+	 * @param exchange
+	 * @return
+	 */
 	protected ServiceInstance choose(ServerWebExchange exchange) {
 		return loadBalancer.choose(((URI) exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR)).getHost());
 	}

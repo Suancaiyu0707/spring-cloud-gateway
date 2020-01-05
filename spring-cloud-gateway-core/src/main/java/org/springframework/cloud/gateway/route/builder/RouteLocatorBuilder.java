@@ -42,8 +42,7 @@ public class RouteLocatorBuilder {
 	}
 
 	/**
-	 * Creates a new {@link Builder}
-	 * @return a new {@link Builder}
+	 * 创建一个RouteLocatorBuilder，并绑定spring上下文
 	 */
 	public Builder routes() {
 		return new Builder(context);
@@ -71,9 +70,18 @@ public class RouteLocatorBuilder {
 		 * 1、创建RouteSpec对象
 		 * 2、调用 RouteSpec#id(...) 方法，创建 PredicateSpec 对象
 		 */
+		/***
+		 * 创建一个新的路由对象：{@link Route}
+		 * @param id  指定路由Id
+		 * @param fn 用于创建对应的路由构建器Route.AsyncBuilder的函数，创建的Route.AsyncBuilder会绑定对应的断言信息
+		 * @return
+		 * 1、根据当前的RouteLocatorBuilder创建一个RouteSpec
+		 * 2、RouteSpec会根据断言配置构建一个断言信息创建一个PredicateSpec。
+		 * 3、fn会根据PredicateSpec创建一个routeBuilder（本质上是PredicateSpec会根据fn的断言配置调用相应的方法）
+		 */
 		public Builder route(String id, Function<PredicateSpec, Route.AsyncBuilder> fn) {
 			Route.AsyncBuilder routeBuilder = fn.apply(
-					new RouteSpec(this)//创建RouteSpec对象
+					new RouteSpec(this)//根据当前Router构建器创建Route标准对象：RouteSpec对象，这个
 					.id(id)//调用 RouteSpec#id(...) 方法，创建 PredicateSpec 对象
 			);
 			add(routeBuilder);
@@ -113,9 +121,17 @@ public class RouteLocatorBuilder {
 		}
 	}
 
-
+	/***
+	 * 这是一个Route标准对象类型
+	 */
 	public static class RouteSpec {
+		/***
+		 * 初始化一个AsyncBuilder对象，也就是路由的构建器
+		 */
 		private final Route.AsyncBuilder routeBuilder = Route.async();
+		/***
+		 * 又捡起
+		 */
 		private final Builder builder;
 
 		RouteSpec(Builder builder) {

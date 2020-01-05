@@ -54,6 +54,60 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 /**
+ * 	spring:
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       - id: cookie-route
+ *         uri: http://example.org
+ *         predicates:
+ *         - Cookie=username, xuzf #定义了一个 Predicate，当名称为 username 的 Cookie 的值匹配xuzf时 Predicate 才能够匹配，它由 CookieRoutePredicateFactory 来生产
+ *         filters:
+ *         - AddRequestHeader=X-Request-Foo, Bar # 定义了一个 Filter，所有的请求转发至下游服务时会添加请求头 X-Request-Foo:Bar ，由AddRequestHeaderGatewayFilterFactory 来生产。
+ *       - id: default_path_to_httpbin
+ *         uri: http://example.org
+ *         order: 10000
+ *         predicates:
+ *         - Path=/**
+ *       default-filters:
+ *       - PrefixPath=/httpbin
+ *       - AddResponseHeader=X-Response-Default-Foo, Default-Bar
+ *
+ *  映射成如下
+ * 	GatewayProperties{
+ * 		routes=[
+ * 			RouteDefinition{
+ * 				id='cookie-route',
+ * 				predicates=[
+ * 					PredicateDefinition{
+ * 						name='Cookie', args={_genkey_0=username, _genkey_1=xuzf}
+ * 					}
+ * 				],
+ * 				filters=[
+ * 					FilterDefinition{
+ * 						name='AddRequestHeader', args={_genkey_0=X-Request-Foo, _genkey_1=Bar}
+ * 					}
+ * 				],
+ * 				uri=http://example.org,
+ * 				order=0},
+ * 			RouteDefinition{
+ * 				id='default_path_to_httpbin',
+ * 				predicates=[
+ * 					PredicateDefinition{
+ * 						name='Path',
+ * 						args={_genkey_0=/**}
+ * 					}
+ * 				],
+ * 				filters=[],
+ * 				uri=http://example.org,
+ * 				order=10000
+ * 			}
+ * 		],
+ * 		defaultFilters=[
+ * 			FilterDefinition{name='PrefixPath', args={_genkey_0=/httpbin}},
+ * 			FilterDefinition{name='AddResponseHeader', args={_genkey_0=X-Response-Default-Foo, _genkey_1=Default-Bar}}], streamingMediaTypes=[text/event-stream, application/stream+json
+ * 		]
+ * 	}
  * @author Spencer Gibb
  * GatewayProperties 是 Spring cloud gateway 模块提供的外部化配置类。
  *  从appliccation.yml中解析前缀为spring.cloud.gateway的配置

@@ -24,9 +24,13 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author Spencer Gibb
+ * 有序的网关过滤器。
+ * 在 GatewayFilterChain 里，过滤器数组首先会按照 order 升序排序，按照顺序过滤请求
  */
 public class OrderedGatewayFilter implements GatewayFilter, Ordered {
-
+	/**
+	 * 真正委托的 GatewayFilter
+	 */
 	private final GatewayFilter delegate;
 	private final int order;
 
@@ -41,6 +45,7 @@ public class OrderedGatewayFilter implements GatewayFilter, Ordered {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		//交给委托的过滤器去执行
 		return this.delegate.filter(exchange, chain);
 	}
 

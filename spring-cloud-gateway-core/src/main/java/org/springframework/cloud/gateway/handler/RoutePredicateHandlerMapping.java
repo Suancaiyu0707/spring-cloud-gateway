@@ -37,22 +37,34 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
 /**
+ * DispatcherHandler接收到请求，匹配 HandlerMapping ，会匹配到 RoutePredicateHandlerMapping 。
  * @author Spencer Gibb
  * 用于处理客户端请求，并查找route
  */
 public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
 
 	private final FilteringWebHandler webHandler;
+	/***
+	 * 默认是 CachingRouteLocator，立马包含一个组合的delegate属性
+	 * 	this.routeLocator = {CachingRouteLocator@6316}
+	 *  	delegate = {CompositeRouteLocator@7980}
+	 *  	routes = {FluxDefer@7981} "FluxDefer"
+	 *  	cache = {HashMap@7982}  size = 0
+	 */
 	private final RouteLocator routeLocator;
 	private final Integer managementPort;
 	private final ManagementPortType managementPortType;
 
-	public RoutePredicateHandlerMapping(FilteringWebHandler webHandler, RouteLocator routeLocator, GlobalCorsProperties globalCorsProperties, Environment environment) {
+	public RoutePredicateHandlerMapping(FilteringWebHandler webHandler,
+										RouteLocator routeLocator,
+										GlobalCorsProperties globalCorsProperties,
+										Environment environment) {
 		this.webHandler = webHandler;
 		this.routeLocator = routeLocator;
 
 		this.managementPort = getPortProperty(environment, "management.server.");
 		this.managementPortType = getManagementPortType(environment);
+		//requestMappingHandlerMapping 之后
 		setOrder(1);
 		setCorsConfigurations(globalCorsProperties.getCorsConfigurations());
 	}
@@ -72,6 +84,32 @@ public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
 		return environment.getProperty(prefix + "port", Integer.class);
 	}
 
+	/**
+	 *
+	 * @param exchange：
+	 *      	request = {ReactorServerHttpRequest@7859}
+	 * 				request = {HttpServerOperations@7250} "GET:/get"
+	 * 				bufferFactory = {NettyDataBufferFactory@7871} "NettyDataBufferFactory (PooledByteBufAllocator(directByDefault: true))"
+	 * 				uri = {URI@7872} "http://localhost:8070/get"
+	 * 				path = {DefaultRequestPath@7873} "DefaultRequestPath[fullPath='[path='/get']', contextPath='', pathWithinApplication='/get']"
+	 * 				headers = {HttpHeaders@7874}  size = 11
+	 * 				queryParams = null
+	 * 				cookies = null
+	 * 				sslInfo = null
+	 * 			response = {ReactorServerHttpResponse@7860}
+	 * 			attributes = {ConcurrentHashMap@7861}  size = 2
+	 * 			sessionMono = {MonoProcessor@7862} "MonoProcessor"
+	 * 			localeContextResolver = {AcceptHeaderLocaleContextResolver@7863}
+	 * 			formDataMono = {MonoProcessor@7864} "MonoProcessor"
+	 * 			multipartDataMono = {MonoProcessor@7865} "MonoProcessor"
+	 * 			applicationContext = {AnnotationConfigReactiveWebServerApplicationContext@5125} "org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext@2472c7d8: startup date [Sun Dec 29 16:49:30 CST 2019]; parent: org.springframework.context.annotation.AnnotationConfigApplicationContext@1b75c2e3"
+	 * 			notModified = false
+	 * 			urlTransformer = {DefaultServerWebExchange$lambda@7866}
+	 * @return
+	 * 1、遍历查找路由列表，并找到匹配的Route路由，并将匹配的路由放到 request属性里，属性名：GATEWAY_ROUTE_ATTR
+	 * 2、找到匹配的route后，会返回一个FilteringWebHandler，后续会通过FilteringWebHandler匹配处理
+	 * 3、如果没有匹配的路由列表，则返回一个Mono.empty()
+	 */
 	@Override
 	protected Mono<?> getHandlerInternal(ServerWebExchange exchange) {
 		// don't handle requests on management port if set and different than server port
@@ -79,19 +117,25 @@ public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
 				&& exchange.getRequest().getURI().getPort() == this.managementPort) {
 			return Mono.empty();
 		}
+		//设置gatewayHandlerMapper=RoutePredicateHandlerMapping
 		exchange.getAttributes().put(GATEWAY_HANDLER_MAPPER_ATTR, getSimpleName());
 
-		return lookupRoute(exchange)
+		return lookupRoute(exchange)//查找匹配Route列表
 				// .log("route-predicate-handler-mapping", Level.FINER) //name this
+				//返回 Route 的处理器 FilteringWebHandler
 				.flatMap((Function<Route, Mono<?>>) r -> {
+					//设置 GATEWAY_ROUTE_ATTR 为匹配的route
 					exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Mapping [" + getExchangeDesc(exchange) + "] to " + r);
 					}
-
 					exchange.getAttributes().put(GATEWAY_ROUTE_ATTR, r);
+					//返回 FilteringWebHandler
 					return Mono.just(webHandler);
-				}).switchIfEmpty(Mono.empty().then(Mono.fromRunnable(() -> {
+
+				})//匹配不到 Route ，返回 Mono.empty()
+				.switchIfEmpty(Mono.empty().then(Mono.fromRunnable(() -> {
+					//当前未找到路由时返回空，并移除GATEWAY_PREDICATE_ROUTE_ATTR
 					exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
 					if (logger.isTraceEnabled()) {
 						logger.trace("No RouteDefinition found for [" + getExchangeDesc(exchange) + "]");
@@ -119,19 +163,41 @@ public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/***
-	 * 根据请求查找路由
-	 * @param exchange
+	 * 根据请求查找路由，exchange里有个request参数，立马可以获得path，如下
+	 * @param exchange：
+	 * 		request = {ReactorServerHttpRequest@7859}
+	 * 				request = {HttpServerOperations@7250} "GET:/get"
+	 * 				bufferFactory = {NettyDataBufferFactory@7871} "NettyDataBufferFactory (PooledByteBufAllocator(directByDefault: true))"
+	 * 				uri = {URI@7872} "http://localhost:8070/get"
+	 * 				path = {DefaultRequestPath@7873} "DefaultRequestPath[fullPath='[path='/get']', contextPath='', pathWithinApplication='/get']"
+	 * 				headers = {HttpHeaders@7874}  size = 11
+	 * 				queryParams = null
+	 * 				cookies = null
+	 * 				sslInfo = null
+	 * 			response = {ReactorServerHttpResponse@7860}
+	 * 			attributes = {ConcurrentHashMap@7861}  size = 2
+	 * 			sessionMono = {MonoProcessor@7862} "MonoProcessor"
+	 * 			localeContextResolver = {AcceptHeaderLocaleContextResolver@7863}
+	 * 			formDataMono = {MonoProcessor@7864} "MonoProcessor"
+	 * 			multipartDataMono = {MonoProcessor@7865} "MonoProcessor"
+	 * 			applicationContext = {AnnotationConfigReactiveWebServerApplicationContext@5125} "org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext@2472c7d8: startup date [Sun Dec 29 16:49:30 CST 2019]; parent: org.springframework.context.annotation.AnnotationConfigApplicationContext@1b75c2e3"
+	 * 			notModified = false
+	 * 			urlTransformer = {DefaultServerWebExchange$lambda@7866}
 	 * @return
+	 * 1、通过路由定位器获取全部路由RouteLocator：CachingRouteLocator、CompositeRouteLocator、RouteDefinitionRouteLocator
+	 * 2、通过路由的断言（Predicate）过滤掉不可用的路由信息
 	 */
 	protected Mono<Route> lookupRoute(ServerWebExchange exchange) {
+		//
 		return this.routeLocator
-				.getRoutes()
+				.getRoutes()//获得全部 Route ，。
 				//individually filter routes so that filterWhen error delaying is not a problem
 				.concatMap(route -> Mono
-						.just(route)
-						.filterWhen(r -> {
+						.just(route)//顺序匹配一个 Route
+						.filterWhen(r -> {//如果找到匹配的Route
 							// add the current route we are testing
 							exchange.getAttributes().put(GATEWAY_PREDICATE_ROUTE_ATTR, r.getId());
+							//返回通过断言过滤的路由信息
 							return r.getPredicate().apply(exchange);
 						})
 						//instead of immediately stopping main flux due to error, log and swallow it

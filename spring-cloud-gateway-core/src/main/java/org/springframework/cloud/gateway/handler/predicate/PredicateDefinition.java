@@ -57,7 +57,10 @@ public class PredicateDefinition {
 	 * 一个键值对参数用于构造 Predicate 对象
 	 * eg:
 	 * 	- Cookie=username, xuzf #这里的username, xuzf会被解析到args里
-	 * 	args：{"_genkey_0":"username","_genkey_1":"xuzf"}
+	 * 	args：{
+	 * 		"_genkey_0":"username",
+	 * 		"_genkey_1":"xuzf"
+	 * 	}
 	 */
 	private Map<String, String> args = new LinkedHashMap<>();
 
@@ -77,9 +80,13 @@ public class PredicateDefinition {
 		}
 		//截取'='前的值，设置为name属性，也就是Predicate类型名称，比如：Cookie
 		setName(text.substring(0, eqIdx));
-		//处理'='后的参数： username, xuzf。会被转成{"_genkey_0":"username","_genkey_1":"xuzf"}
+		//处理'='后的参数： username, xuzf。会被转成["username","xuzf"]
 		String[] args = tokenizeToStringArray(text.substring(eqIdx+1), ",");
-
+		//根据args数组初始化args集合，args集合：
+		// {
+	 	//	"_genkey_0":"username",
+	 	//	"_genkey_1":"xuzf"
+		// }
 		for (int i=0; i < args.length; i++) {
 			this.args.put(NameUtils.generateName(i), args[i]);
 		}

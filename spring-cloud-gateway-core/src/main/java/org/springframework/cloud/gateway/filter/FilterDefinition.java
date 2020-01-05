@@ -77,9 +77,13 @@ public class FilterDefinition {
 		}
 		//如果存在'='号，则截取'='前的值，设置为name属性，也就是Filter类型名称，比如：AddRequestHeader
 		setName(text.substring(0, eqIdx));
-		//处理'='后的参数： X-Request-Foo, Bar。会被转成{"_genkey_0":"X-Request-Foo","_genkey_1":"Bar"}
+		//处理'='后的参数： X-Request-Foo, Bar。会被转成["X-Request-Foo","Bar"]
 		String[] args = tokenizeToStringArray(text.substring(eqIdx+1), ",");
-
+		//根据args数组初始化args集合，args集合：
+		// {
+		// 		"_genkey_0":"X-Request-Foo",
+		// 		"_genkey_1":"Bar"
+		// }
 		for (int i=0; i < args.length; i++) {
 			this.args.put(NameUtils.generateName(i), args[i]);
 		}

@@ -16,6 +16,20 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.i
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.setAlreadyRouted;
 
 /***
+ * spring:
+ *   application:
+ *       name: juejin-gateway
+ *   cloud:
+ *     gateway:
+ *       routes:
+ *       # =====================================
+ *       - id: forward_sample
+ *         uri: forward:///globalfilters
+ *         order: 10000
+ *         predicates:
+ *         - Path=/globalfilters
+ *         filters:
+ *         - PrefixPath=/application/gateway
  * 转发路由网关过滤器。其根据 forward:// 前缀( Scheme )过滤处理，将请求转发到当前网关实例本地接口。
  */
 public class ForwardRoutingFilter implements GlobalFilter, Ordered {
@@ -48,6 +62,7 @@ public class ForwardRoutingFilter implements GlobalFilter, Ordered {
 		URI requestUrl = exchange.getRequiredAttribute(GATEWAY_REQUEST_URL_ATTR);
 
 		String scheme = requestUrl.getScheme();
+		//判断有 forward:// 前缀( Scheme )，过滤处理，将请求转发给 DispatcherHandler
 		if (isAlreadyRouted(exchange) || !"forward".equals(scheme)) {
 			return chain.filter(exchange);
 		}

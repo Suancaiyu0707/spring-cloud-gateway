@@ -27,7 +27,44 @@ import reactor.core.publisher.Flux;
  * 从配置文件(yml/properties) 读取路由配置
  */
 public class PropertiesRouteDefinitionLocator implements RouteDefinitionLocator {
-
+	/***
+	 * 网关配置
+	 * 	eg：
+	 * 	GatewayProperties{
+	 * 		routes=[
+	 * 			RouteDefinition{
+	 * 				id='cookie-route',
+	 * 				predicates=[
+	 * 					PredicateDefinition{
+	 * 						name='Cookie', args={_genkey_0=username, _genkey_1=xuzf}
+	 * 					}
+	 * 				],
+	 * 				filters=[
+	 * 					FilterDefinition{
+	 * 						name='AddRequestHeader', args={_genkey_0=X-Request-Foo, _genkey_1=Bar}
+	 * 					}
+	 * 				],
+	 * 				uri=http://example.org,
+	 * 				order=0},
+	 * 			RouteDefinition{
+	 * 				id='default_path_to_httpbin',
+	 * 				predicates=[
+	 * 					PredicateDefinition{
+	 * 						name='Path',
+	 * 						args={_genkey_0=/**}
+	 * 					}
+	 * 				],
+	 * 				filters=[],
+	 * 				uri=http://example.org,
+	 * 				order=10000
+	 * 			}
+	 * 		],
+	 * 		defaultFilters=[
+	 * 			FilterDefinition{name='PrefixPath', args={_genkey_0=/httpbin}},
+	 * 			FilterDefinition{name='AddResponseHeader', args={_genkey_0=X-Response-Default-Foo, _genkey_1=Default-Bar}}], streamingMediaTypes=[text/event-stream, application/stream+json
+	 * 		]
+	 * 	}
+	 */
 	private final GatewayProperties properties;
 
 	public PropertiesRouteDefinitionLocator(GatewayProperties properties) {
